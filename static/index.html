@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrepOrbit AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <canvas id="networkCanvas"></canvas>
+
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+  <div class="grid-overlay"></div>
+
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-left">
+        <div class="hero-badge">AI Career Prep Workspace</div>
+        <h1>PrepOrbit AI</h1>
+        <p class="subtitle">
+          Multi-agent interview preparation, live mock interviewing, performance analysis, adaptive replanning, and structured productivity tools.
+        </p>
+      </div>
+      <div class="hero-right">
+        <div class="live-chip">● Cloud Run Live</div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="glass-card command-card">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">COMMAND CENTER</p>
+            <h2>Interview Prep Workspace</h2>
+          </div>
+          <div class="tiny-pill">Primary Orchestrator Active</div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="showTab('plan')">Prep Plan</button>
+          <button class="tab" onclick="showTab('analyze')">Analyze Mock</button>
+          <button class="tab" onclick="showTab('replan')">Replan</button>
+          <button class="tab" onclick="showTab('live')">Mock Interview</button>
+        </div>
+
+        <div id="tab-plan" class="tab-panel active">
+          <div class="panel-grid">
+            <input id="plan-user" value="sony_1" placeholder="User ID" />
+            <input id="plan-role" value="SDE-2" placeholder="Target Role" />
+            <input id="plan-company" value="Amazon" placeholder="Company" />
+            <input id="plan-days" type="number" value="5" placeholder="Timeline Days" />
+          </div>
+          <input id="plan-focus" value="DSA,System Design,Behavioral,AI Skills" placeholder="Focus Areas comma separated" />
+          <button class="primary-btn" onclick="createPlan()">Generate Prep Plan</button>
+        </div>
+
+        <div id="tab-analyze" class="tab-panel">
+          <div class="panel-grid">
+            <input id="analyze-user" value="sony_1" placeholder="User ID" />
+            <input id="analyze-type" value="system_design" placeholder="Question Type" />
+          </div>
+          <input id="analyze-prompt" value="Design URL Shortener" placeholder="Prompt" />
+          <textarea id="analyze-answer" rows="7" placeholder="Paste your answer here...">I would use database, cache, API endpoints and load balancer, but I need to improve scalability discussion.</textarea>
+          <button class="primary-btn" onclick="analyzeMock()">Analyze Answer</button>
+        </div>
+
+        <div id="tab-replan" class="tab-panel">
+          <div class="panel-grid">
+            <input id="replan-user" value="sony_1" placeholder="User ID" />
+            <input id="replan-days" type="number" value="2" placeholder="Missed Days" />
+          </div>
+          <button class="primary-btn" onclick="replanPrep()">Replan Preparation</button>
+        </div>
+
+        <div id="tab-live" class="tab-panel">
+          <div class="panel-grid">
+            <input id="live-user" value="sony_1" placeholder="User ID" />
+            <select id="live-type">
+              <option value="dsa">DSA</option>
+              <option value="system_design">System Design</option>
+              <option value="behavioral">Behavioral</option>
+              <option value="ai">AI Skills</option>
+            </select>
+          </div>
+
+          <div class="question-card">
+            <div class="question-top">
+              <span class="question-label">AI Interviewer</span>
+              <button class="secondary-btn" onclick="startMockInterview()">Start Interview</button>
+            </div>
+            <p id="live-question" class="question-text">Click “Start Interview” to begin your mock session.</p>
+          </div>
+
+          <textarea id="live-answer" rows="7" placeholder="Type your interview answer here..."></textarea>
+          <button class="primary-btn" onclick="evaluateMockInterview()">Evaluate Interview Answer</button>
+        </div>
+      </section>
+
+      <aside class="right-column">
+        <section class="glass-card status-card">
+          <p class="eyebrow">SYSTEM STATUS</p>
+          <h3>Workspace Health</h3>
+          <div id="statusBox" class="status-box">Ready</div>
+        </section>
+
+        <section class="glass-card metrics-card">
+          <p class="eyebrow">READINESS SNAPSHOT</p>
+          <h3>Preparation Metrics</h3>
+
+          <div class="metric-row"><span>Prep Tasks</span><strong id="metricTasks">0</strong></div>
+          <div class="metric-row"><span>Study Blocks</span><strong id="metricBlocks">0</strong></div>
+          <div class="metric-row"><span>Weak Areas</span><strong id="metricWeak">0</strong></div>
+          <div class="metric-row"><span>Latest Score</span><strong id="metricScore">-</strong></div>
+        </section>
+
+        <section class="glass-card agents-card">
+          <p class="eyebrow">AGENT NETWORK</p>
+          <h3>Agents Involved</h3>
+          <div id="agentsBox" class="chips">
+            <span class="chip">OrchestratorAgent</span>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="results-layout">
+      <section class="glass-card result-card">
+        <p class="eyebrow">WORKFLOW SUMMARY</p>
+        <h3>What just happened?</h3>
+        <div id="summaryBox" class="result-content muted">Run a workflow to see a structured summary.</div>
+      </section>
+
+      <section class="glass-card result-card">
+        <p class="eyebrow">DETAILS & FEEDBACK</p>
+        <h3>Plan / Weakness / Follow-up</h3>
+        <div id="detailsBox" class="result-content muted">Generated plan, evaluation details, and follow-up actions will appear here.</div>
+      </section>
+    </section>
+
+    <section class="glass-card dashboard-section">
+      <div class="dashboard-header">
+        <div>
+          <p class="eyebrow">PERSISTED USER DATA</p>
+          <h3>User Dashboard</h3>
+        </div>
+        <button class="secondary-btn" onclick="loadDashboard()">Load Dashboard</button>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-panel">
+          <h4>Tasks</h4>
+          <ul id="tasksList"><li class="muted">No data yet</li></ul>
+        </div>
+
+        <div class="dashboard-panel">
+          <h4>Calendar Blocks</h4>
+          <ul id="blocksList"><li class="muted">No data yet</li></ul>
+        </div>
+
+        <div class="dashboard-panel">
+          <h4>Weak Area Notes</h4>
+          <ul id="notesList"><li class="muted">No data yet</li></ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/static/network.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
